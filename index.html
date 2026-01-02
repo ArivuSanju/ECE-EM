@@ -842,7 +842,11 @@
         
         async function saveAllData() {
             try {
-                const data = collectAllData();
+                // Ask for name only if not already set
+                if (!studentData.studentName) {
+                    studentData.studentName = prompt("Enter your name:") || "Student";
+                }
+                const data = collectAllData(false);
                 await window.storage.set('entrepreneurship_data', JSON.stringify(data));
                 showSaveStatus('✓ Data saved successfully!', 'success');
             } catch (error) {
@@ -864,9 +868,9 @@
             }
         }
         
-        function collectAllData() {
+        function collectAllData(askForName = false) {
             const data = {
-                studentName: prompt("Enter your name:") || "Student",
+                studentName: askForName ? (prompt("Enter your name:") || "Student") : (studentData.studentName || "Student"),
                 timestamp: new Date().toISOString(),
                 completedSections: Array.from(completedSections),
                 businessModelCanvas: {},
@@ -997,10 +1001,19 @@
                 completedSections = new Set(data.completedSections);
                 updateProgress();
             }
+            
+            // Restore student name
+            if (data.studentName) {
+                studentData.studentName = data.studentName;
+            }
         }
         
         function exportToJSON() {
-            const data = collectAllData();
+            // Ask for name only when exporting
+            if (!studentData.studentName) {
+                studentData.studentName = prompt("Enter your name for the export file:") || "Student";
+            }
+            const data = collectAllData(false);
             const jsonStr = JSON.stringify(data, null, 2);
             const blob = new Blob([jsonStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -1015,7 +1028,11 @@
         }
         
         function exportToText() {
-            const data = collectAllData();
+            // Ask for name only when exporting
+            if (!studentData.studentName) {
+                studentData.studentName = prompt("Enter your name for the export file:") || "Student";
+            }
+            const data = collectAllData(false);
             let textContent = `ENTREPRENEURSHIP COURSE - STUDENT SUBMISSION\n`;
             textContent += `${'='.repeat(60)}\n\n`;
             textContent += `Student Name: ${data.studentName}\n`;
